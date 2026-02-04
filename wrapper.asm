@@ -23,7 +23,7 @@ HijackLogicWarpper PROC
     pushfq                                  ; 压入eflags
 
 	sub rsp, 28h							; 栈对齐
-    mov rcx, r9                             ; 传参 参数为父函数的arg4
+    mov rcx, rdx                             ; 传参 参数为父函数的arg4
 	call HijackLogic						; 调用HijackLogic 修改KeyClass内存
     add rsp, 28h							; 恢复栈
 	

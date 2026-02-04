@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.35931.194
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DbkeyHook", "DbkeyHook.vcxproj", "{B8305ABB-1F1B-4FD5-AF77-A1F7C9CB67FD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mmmojo_64", "DbkeyHook.vcxproj", "{B8305ABB-1F1B-4FD5-AF77-A1F7C9CB67FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,8 +13,8 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B8305ABB-1F1B-4FD5-AF77-A1F7C9CB67FD}.Debug|x64.ActiveCfg = Debug|x64
-		{B8305ABB-1F1B-4FD5-AF77-A1F7C9CB67FD}.Debug|x64.Build.0 = Debug|x64
+		{B8305ABB-1F1B-4FD5-AF77-A1F7C9CB67FD}.Debug|x64.ActiveCfg = Release|x64
+		{B8305ABB-1F1B-4FD5-AF77-A1F7C9CB67FD}.Debug|x64.Build.0 = Release|x64
 		{B8305ABB-1F1B-4FD5-AF77-A1F7C9CB67FD}.Debug|x86.ActiveCfg = Debug|Win32
 		{B8305ABB-1F1B-4FD5-AF77-A1F7C9CB67FD}.Debug|x86.Build.0 = Debug|Win32
 		{B8305ABB-1F1B-4FD5-AF77-A1F7C9CB67FD}.Release|x64.ActiveCfg = Release|x64

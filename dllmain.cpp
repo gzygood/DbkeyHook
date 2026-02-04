@@ -109,51 +109,49 @@ void HookEnd(uint8_t type)
 }
 
 
-uint64_t HijackLogic(uint64_t a4/*r9*/)
+uint64_t HijackLogic(uint64_t struct_addr) 
 {
+    if (!struct_addr) return 0;
 
-    uint64_t key_class = a4;
-    uint64_t DbkeyLength_addr = key_class + 0x18, DbkeyLength = 0;
-    uint64_t Dbkey_addr_offet = key_class + 0x8, DbkeyAddr = 0;
+    uint64_t key_class = struct_addr;
+    uint64_t Dbkey_addr_offset = key_class + 0x08, DbkeyAddr = 0;
 
 
-    ReadProcessMemory(GetCurrentProcess(), (LPCVOID)DbkeyLength_addr, &DbkeyLength, 4, NULL); //
-    ReadProcessMemory(GetCurrentProcess(), (LPCVOID)Dbkey_addr_offet, &DbkeyAddr, 8, NULL); //
+    BOOL bReadPtr = ReadProcessMemory(GetCurrentProcess(), (LPCVOID)Dbkey_addr_offset, &DbkeyAddr, 8, NULL);
 
-    OutputDebugPrintf("[DbkeyHook] DbkeyLength = [%d],DbkeyAddr = 0x%llX", DbkeyLength, DbkeyAddr);
-
-    if (!DbkeyAddr || DbkeyLength != 32) {
+    if (!bReadPtr || !DbkeyAddr)
+    {
+        OutputDebugPrintf("[DbkeyHook] Failed to read RealKey Pointer or Pointer is NULL!");
         return 0;
     }
 
     uint8_t db_key[32];
+    BOOL bReadKey = ReadProcessMemory(GetCurrentProcess(), (LPCVOID)DbkeyAddr, db_key, 32, NULL);
 
-    BOOL bRet = ReadProcessMemory(GetCurrentProcess(), (LPCVOID)DbkeyAddr, db_key, 32, NULL);
-    if (!bRet)
+    if (!bReadKey)
     {
-        OutputDebugPrintf("[DbkeyHook] Read db_key Bytes Failed! [%d]", GetLastError());
+        OutputDebugPrintf("[DbkeyHook] Read RealKey Bytes Failed! LastError: [%d]", GetLastError());
         return 0;
     }
 
     std::string db_key_Str = toHexString(db_key, sizeof(db_key));
-    OutputDebugPrintf("[DbkeyHook] GET DBkey String [%s]", db_key_Str.c_str());
+    OutputDebugPrintf("[DbkeyHook] SUCCESS! Real Key: [%s]", db_key_Str.c_str());
 
-    std::ofstream file("dbkey.txt"); // 默认覆盖模式
-    if (file.is_open()) {
-        file << db_key_Str;    // 写入文本
-        file.close();                 // 显式关闭文件（可选，析构时会自动关闭）
-        //获取到dbkey就取消hook
-        HookEnd(1);
-        OutputDebugPrintf("[DbkeyHook] Write dbkey to dbkey.txt");
+    HookEnd(1); // 写微信安装目录很可能不成功，但是并不代表hook失败了！！  卸载指令
+
+    std::ofstream file("dbkey.txt");
+    if (file.is_open())
+    {
+        file << db_key_Str;
+        file.close();
+        OutputDebugPrintf("[DbkeyHook] Write RealKey to dbkey.txt Success.");
     }
-    else {
-
-        OutputDebugPrintf("[DbkeyHook] Write dbkey.txt Failed! [%d]", GetLastError());
+    else
+    {
+        OutputDebugPrintf("[DbkeyHook] Write dbkey.txt Failed! LastError: [%d]", GetLastError());
     }
-
 
     return 0;
-
 }
 
 
@@ -166,12 +164,12 @@ void HookStart(HMODULE hModule)
         return;
     }
     g_imgbase = (uint64_t)weixin_dll_base;
-    g_hook_offset = 0x0C0A9A6;// 这个是4.0.5.7的        4.0.3.43 = 0x0BC91A6    4.0.5.13=0xC0CC76   4.0.6.17=0xCF1F16
+	g_hook_offset = 0x05325CC;// 这个是4.1.7.30的        4.0.3.43 = 0x0BC91A6    4.0.5.13=0xC0CC76   4.0.6.17=0xCF1F16   4.0.5.7=0x0C0A9A6
 
     //读取Hook点原机器码
     uint64_t hook_addr = g_imgbase + g_hook_offset;
-    uint8_t hook_opcode[] = {/*mov rax, 地址*/0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /*jmp rax*/0xFF, 0xE0 };
-    size_t hook_size = sizeof(hook_opcode); //12个字节
+    uint8_t hook_opcode[] = {/*mov rax, 地址*/0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /*jmp rax*/0xFF, 0xE0, /*NOP 对齐13字节*/0x90};
+    size_t hook_size = sizeof(hook_opcode); //13个字节
 
     OrgInfo hook_org_info;// 记录原始字节信息
     hook_org_info.addr = hook_addr;         //记录地址
@@ -201,7 +199,7 @@ void HookStart(HMODULE hModule)
         return;
     }
 
-    uint8_t jmp_org_opcode[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
+    uint8_t jmp_org_opcode[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0, 0x90 };
     uint64_t next_insn_addr = hook_addr + org_insns_len;
     for (size_t i = 0; i < sizeof(uint64_t); i++) //跳回去
         jmp_org_opcode[i + 2] = *((uint8_t*)(&next_insn_addr) + i);
