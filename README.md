@@ -4,8 +4,6 @@ PC微信4.0.3.39以后版本HOOK获取dbkey
 推荐另外一个大家可能需要的项目：
 解密与查看微信 4.1 的图片，将微信缓存的 dat 文件解密为原始图片格式
 https://github.com/recarto404/WxDatDecrypt  
-彩虹微信API（全功能hook，支持最新4.1.9.30）：  
-http://chwxapi.apifox.cn/  
 
 
 ## DbkeyHookCMD
